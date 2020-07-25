@@ -1,11 +1,45 @@
-import React from 'react';
+import React, {Fragment, useState} from 'react';
 // el state es para que la app funcione más rápido
+import {calcularTotal} from '../helpers';
 
-const Formulario = ({cantidad, guardarCantidad}) => {
+const Formulario = (props) => {
+
+    const {cantidad, guardarCantidad, plazo, guardarPlazo, total, guardarTotal, guardarCargando} = props;
+
+    //Definir state
+    const [error, guardarError] = useState(false);
+
+    //Cuando el usuario hace submit
+    const calcularPrestamo = e => {
+        e.preventDefault();
+        //Validar
+        if(cantidad === 0 || plazo === ''){
+            guardarError(true);
+            return;
+        }
+
+        //Eliminar el error previo
+        guardarError(false);
+
+        //Habilitar el spinner
+        guardarCargando(true);
+
+
+        setTimeout(() => {
+                    //Realizar la cotización
+        const total = calcularTotal(cantidad, plazo);
+        
+        //Una vez calculado guardar el total
+        guardarTotal(total);
+
+        //Deshabilitar el spinner
+        guardarCargando(false);
+        }, 3000);
+    }
 
     return (
-        <form>
-            {cantidad}
+        <Fragment>
+        <form onSubmit={calcularPrestamo}>
             <div className = "row" >
                 <div >
                     <label> Cantidad Prestamo </label>
@@ -18,7 +52,10 @@ const Formulario = ({cantidad, guardarCantidad}) => {
             </div>
             <div>
                 <label>Plazo para Pagar</label>
-                <select className = "u-full-width" >
+                <select 
+                    className = "u-full-width"
+                    onChange={e => guardarPlazo(parseInt(e.target.value))}
+                >
                     <option value = "" > Seleccionar </option>
                     <option value = "3" > 3 meses </option>
                     <option value = "6" > 6 meses </option>
@@ -34,6 +71,8 @@ const Formulario = ({cantidad, guardarCantidad}) => {
                 />
             </div></div>
         </form>
+        {(error)? <p className="error">Todos los campos son obligatorios</p> : null}
+        </Fragment>
     );
 }
 
